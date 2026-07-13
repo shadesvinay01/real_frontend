@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
+import LeadDetailModal from '@/components/leads/LeadDetailModal';
 
 const COLUMNS = [
   { id: 'NEW', label: 'New Leads', color: 'bg-blue-500' },
@@ -14,6 +15,7 @@ const COLUMNS = [
 export default function LeadsKanban() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
 
   useEffect(() => {
     fetchLeads();
@@ -108,6 +110,7 @@ export default function LeadsKanban() {
                       key={lead.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e as any, lead.id)}
+                      onClick={() => setSelectedLead(lead)}
                       layoutId={`lead-${lead.id}`}
                       className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow"
                     >
@@ -131,6 +134,10 @@ export default function LeadsKanban() {
           })}
         </div>
       </div>
+
+      {selectedLead && (
+        <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} />
+      )}
     </div>
   );
 }

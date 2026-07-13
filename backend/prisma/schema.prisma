@@ -7,40 +7,47 @@ datasource db {
 }
 
 model Organization {
-  id        String   @id @default(uuid())
-  name      String
-  logoUrl   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     User[]
-  leads     Lead[]
+  id         String     @id @default(uuid())
+  name       String
+  logoUrl    String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  users      User[]
+  leads      Lead[]
   properties Property[]
   tasks      Task[]
+  customers  Customer[]
+  notifications Notification[]
+  auditLogs  AuditLog[]
 }
 
 model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  permissions String // comma separated string or JSON
+  id          String  @id @default(uuid())
+  name        String  @unique
+  permissions String  // JSON string of permissions array
   users       User[]
 }
 
 model User {
-  id             String       @id @default(uuid())
-  email          String       @unique
+  id             String        @id @default(uuid())
+  email          String        @unique
   passwordHash   String?
   name           String?
   avatarUrl      String?
+  phone          String?
   organizationId String?
   roleId         String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  role           Role?         @relation(fields: [roleId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  role           Role?          @relation(fields: [roleId], references: [id])
   sessions       Session[]
-  assignedLeads  Lead[]        @relation("LeadOwner")
+  assignedLeads  Lead[]         @relation("LeadOwner")
+  assignedBuyers Customer[]     @relation("BuyerBroker")
   tasks          Task[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
 }
 
 model Session {
@@ -49,30 +56,75 @@ model Session {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// ──────────────────────────────────────────────────────────────
+// BUYER / CUSTOMER MODEL — extended for full Buyer CRM
+// ──────────────────────────────────────────────────────────────
 model Customer {
-  id        String   @id @default(uuid())
-  name      String
-  email     String?  @unique
-  phone     String?  @unique
-  budget    Float?
-  preferredLocation String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  leads     Lead[]
+  id                 String    @id @default(uuid())
+  organizationId     String?
+
+  // Core contact
+  name               String
+  email              String?
+  phone              String?
+  whatsapp           String?
+
+  // Budget
+  budget             Float?    // legacy — kept for backward compat
+  budgetMin          Float?
+  budgetMax          Float?
+
+  // Requirements
+  preferredLocation  String?   // legacy
+  preferredLocations String?   // JSON array: ["Dwarka", "Noida"]
+  propertyTypes      String?   // JSON array: ["APARTMENT", "VILLA"]
+  bedrooms           String?   // e.g. "2,3"
+  bathrooms          String?
+  areaMin            Float?
+  areaMax            Float?
+  loanRequired       Boolean   @default(false)
+
+  // Financial profile
+  occupation         String?
+  company            String?
+  annualIncome       Float?
+
+  // CRM metadata
+  source             String?   // REFERRAL, PORTAL, WALKIN, SOCIAL, OTHER
+  assignedBrokerId   String?
+  priority           String    @default("MEDIUM") // HIGH, MEDIUM, LOW
+  status             String    @default("NEW")     // NEW, CONTACTED, INTERESTED, SITE_VISIT, NEGOTIATION, BOOKED, LOST
+  tags               String?   // JSON array: ["urgent", "loan-ready"]
+
+  // AI fields
+  score              Int       @default(50)
+  scoreReason        String?
+  aiSummary          String?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  organization       Organization? @relation(fields: [organizationId], references: [id])
+  assignedBroker     User?         @relation("BuyerBroker", fields: [assignedBrokerId], references: [id])
+  leads              Lead[]
+  documents          Document[]
 }
 
+// ──────────────────────────────────────────────────────────────
+// LEAD — unchanged, stays linked to Customer
+// ──────────────────────────────────────────────────────────────
 model Lead {
   id             String       @id @default(uuid())
   customerId     String
   organizationId String
   ownerId        String?
-  status         String       @default("NEW") // NEW, CONTACTED, SITE_VISIT, NEGOTIATION, WON, LOST
+  status         String       @default("NEW")
   score          Int?
-  priority       String?      // HIGH, MEDIUM, LOW
+  priority       String?
   source         String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -85,40 +137,56 @@ model Lead {
   tasks          Task[]
 }
 
+// ──────────────────────────────────────────────────────────────
+// PROPERTY — extended with more fields
+// ──────────────────────────────────────────────────────────────
 model Property {
-  id             String       @id @default(uuid())
+  id             String    @id @default(uuid())
   organizationId String
   title          String
-  type           String       // RESIDENTIAL, COMMERCIAL, etc.
+  type           String    // APARTMENT, VILLA, PLOT, COMMERCIAL
   price          Float
   location       String
-  status         String       @default("AVAILABLE") // AVAILABLE, SOLD
-  amenities      String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  status         String    @default("AVAILABLE") // AVAILABLE, SOLD, RESERVED
+  amenities      String?   // JSON array
+  bedrooms       Int?
+  bathrooms      Int?
+  area           Float?
+  builderName    String?
+  description    String?
+  imageUrl       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
+// ──────────────────────────────────────────────────────────────
+// TASK
+// ──────────────────────────────────────────────────────────────
 model Task {
-  id             String       @id @default(uuid())
+  id             String    @id @default(uuid())
   organizationId String
   title          String
   description    String?
-  type           String?      @default("CALL") // CALL, MEETING, EMAIL, TODO
-  priority       String?      @default("MEDIUM")
+  type           String?   @default("CALL") // CALL, MEETING, EMAIL, TODO
+  priority       String?   @default("MEDIUM")
   dueDate        DateTime?
-  status         String       @default("PENDING") // PENDING, COMPLETED
+  status         String    @default("PENDING") // PENDING, COMPLETED
   assigneeId     String?
   leadId         String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  buyerId        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   organization   Organization @relation(fields: [organizationId], references: [id])
   assignee       User?        @relation(fields: [assigneeId], references: [id])
   lead           Lead?        @relation(fields: [leadId], references: [id])
 }
 
+// ──────────────────────────────────────────────────────────────
+// NOTE
+// ──────────────────────────────────────────────────────────────
 model Note {
   id        String   @id @default(uuid())
   content   String
@@ -128,12 +196,65 @@ model Note {
   lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 }
 
+// ──────────────────────────────────────────────────────────────
+// ACTIVITY
+// ──────────────────────────────────────────────────────────────
 model Activity {
-  id        String   @id @default(uuid())
-  type      String   // CALL, MEETING, EMAIL
+  id          String   @id @default(uuid())
+  type        String   // CALL, MEETING, EMAIL, WHATSAPP, NOTE
   description String?
-  leadId    String
-  createdAt DateTime @default(now())
+  leadId      String
+  createdAt   DateTime @default(now())
 
-  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────────────────────
+// DOCUMENT — for buyer file uploads (stored as URL/path)
+// ──────────────────────────────────────────────────────────────
+model Document {
+  id         String   @id @default(uuid())
+  name       String
+  url        String
+  type       String   // PAN, AADHAR, SALARY_SLIP, BANK_STATEMENT, OTHER
+  buyerId    String
+  createdAt  DateTime @default(now())
+
+  buyer      Customer @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+}
+
+// ──────────────────────────────────────────────────────────────
+// NOTIFICATION
+// ──────────────────────────────────────────────────────────────
+model Notification {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String?
+  title          String
+  body           String
+  type           String   @default("INFO") // INFO, SUCCESS, WARNING, ERROR
+  read           Boolean  @default(false)
+  link           String?
+  createdAt      DateTime @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User?        @relation(fields: [userId], references: [id])
+}
+
+// ──────────────────────────────────────────────────────────────
+// AUDIT LOG
+// ──────────────────────────────────────────────────────────────
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String?
+  action         String   // CREATED, UPDATED, DELETED
+  resource       String   // BUYER, LEAD, PROPERTY, etc.
+  resourceId     String
+  changes        String?  // JSON diff
+  ipAddress      String?
+  createdAt      DateTime @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User?        @relation(fields: [userId], references: [id])
 }

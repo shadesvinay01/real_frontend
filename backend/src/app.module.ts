@@ -9,9 +9,14 @@ import { TasksModule } from './tasks/tasks.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { CustomersModule } from './customers/customers.module';
 import { NotesModule } from './notes/notes.module';
+import { BuyersModule } from './buyers/buyers.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, LeadsModule, PropertiesModule, TasksModule, AnalyticsModule, CustomersModule, NotesModule],
+  imports: [
+    AuthModule, PrismaModule, LeadsModule, PropertiesModule,
+    TasksModule, AnalyticsModule, CustomersModule, NotesModule,
+    BuyersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

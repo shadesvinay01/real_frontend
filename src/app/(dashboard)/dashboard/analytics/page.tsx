@@ -1,51 +1,85 @@
 "use client";
-import React from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { api } from '@/lib/api';
 
 export default function AnalyticsPage() {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get('/analytics/dashboard');
+      setStats(res.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const chartData = stats?.chartData || [];
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">Analytics Overview</h1>
-          <p className="text-slate-500 dark:text-slate-400">Track your CRM performance and revenue forecasts.</p>
-        </div>
-        <select className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-sm outline-none">
-          <option>Last 30 Days</option>
-          <option>Last Quarter</option>
-          <option>This Year</option>
-        </select>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <p className="text-sm text-slate-500 mb-1">Total Revenue</p>
-          <h3 className="text-3xl font-bold">₹1.2Cr</h3>
-          <p className="text-xs text-green-500 mt-2"><i className="fas fa-arrow-up"></i> 12% vs last month</p>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <p className="text-sm text-slate-500 mb-1">Leads Converted</p>
-          <h3 className="text-3xl font-bold">24</h3>
-          <p className="text-xs text-green-500 mt-2"><i className="fas fa-arrow-up"></i> 5% vs last month</p>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <p className="text-sm text-slate-500 mb-1">Avg Deal Size</p>
-          <h3 className="text-3xl font-bold">₹50L</h3>
-          <p className="text-xs text-slate-400 mt-2"><i className="fas fa-minus"></i> No change</p>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <p className="text-sm text-slate-500 mb-1">AI Prediction (Next Month)</p>
-          <h3 className="text-3xl font-bold text-purple-600">₹1.5Cr</h3>
-          <p className="text-xs text-purple-500 mt-2"><i className="fas fa-robot"></i> High confidence</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight mb-1">Analytics</h1>
+        <p className="text-slate-500 dark:text-slate-400">Track your real estate performance metrics.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 min-h-[300px] flex items-center justify-center">
-          <p className="text-slate-400">Revenue Growth Chart</p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <h3 className="text-lg font-bold mb-4">Revenue Trends</h3>
+          <div className="h-72">
+            {!loading && chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `₹${val/10000000}Cr`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value: any) => [`₹${(value/10000000).toFixed(1)} Cr`, 'Revenue']}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-400">Loading charts...</div>
+            )}
+          </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 min-h-[300px] flex items-center justify-center">
-          <p className="text-slate-400">Lead Source Distribution</p>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+          <h3 className="text-lg font-bold mb-4">Leads Generation</h3>
+          <div className="h-72">
+            {!loading && chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                  <Tooltip 
+                    cursor={{fill: 'rgba(0,0,0,0.05)'}}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="leads" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-400">Loading charts...</div>
+            )}
+          </div>
         </div>
       </div>
     </div>

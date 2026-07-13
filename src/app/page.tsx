@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 const FEATURES = [
   {
@@ -207,13 +208,13 @@ export default function JugnuAI() {
           </div>
 
           <div className="flex items-center gap-3">
-            <a href="#demo" className="hidden md:block text-sm font-semibold text-slate-400 hover:text-white transition-colors px-4 py-2">
-              Live Demo
-            </a>
-            <button onClick={() => setAccessModal(true)}
+            <Link href="/login" className="hidden md:flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-white transition-colors px-4 py-2">
+              <i className="fas fa-sign-in-alt text-xs"></i> Sign In
+            </Link>
+            <Link href="/signup"
               className="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black text-sm font-black hover:shadow-[0_0_24px_rgba(251,191,36,.5)] transition-all flex items-center gap-2">
-              Get Access <i className="fas fa-arrow-right text-[11px]" />
-            </button>
+              Get Started <i className="fas fa-arrow-right text-[11px]" />
+            </Link>
           </div>
         </div>
       </nav>

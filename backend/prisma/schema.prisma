@@ -15,6 +15,7 @@ model Organization {
   users     User[]
   leads     Lead[]
   properties Property[]
+  tasks      Task[]
 }
 
 model Role {
@@ -81,6 +82,7 @@ model Lead {
   owner          User?        @relation("LeadOwner", fields: [ownerId], references: [id])
   notes          Note[]
   activities     Activity[]
+  tasks          Task[]
 }
 
 model Property {
@@ -99,16 +101,22 @@ model Property {
 }
 
 model Task {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  dueDate     DateTime?
-  status      String   @default("PENDING") // PENDING, COMPLETED
-  assigneeId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String       @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  type           String?      @default("CALL") // CALL, MEETING, EMAIL, TODO
+  priority       String?      @default("MEDIUM")
+  dueDate        DateTime?
+  status         String       @default("PENDING") // PENDING, COMPLETED
+  assigneeId     String?
+  leadId         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  assignee    User     @relation(fields: [assigneeId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  assignee       User?        @relation(fields: [assigneeId], references: [id])
+  lead           Lead?        @relation(fields: [leadId], references: [id])
 }
 
 model Note {

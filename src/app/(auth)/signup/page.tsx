@@ -19,7 +19,6 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
     try {
       const response = await api.post('/auth/signup', { email, password, name });
       setAuth(response.data.user, response.data.accessToken);
@@ -31,74 +30,90 @@ export default function SignupPage() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl"
+      transition={{ duration: 0.5, ease: 'easeOut' }}
     >
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Create an account</h1>
-        <p className="text-slate-500 dark:text-slate-400">Start managing your real estate leads with AI</p>
-      </div>
+      {/* Card */}
+      <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_0_80px_rgba(79,70,229,0.15)]">
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
-          <i className="fas fa-exclamation-circle mr-2"></i>{error}
-        </div>
-      )}
+        {/* Top accent */}
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-400/60 to-transparent mb-8" />
 
-      <form onSubmit={handleSignup} className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
-          <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-            placeholder="Rajiv Sharma"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-          <input 
-            type="email" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-            placeholder="name@company.com"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-black text-white mb-2 tracking-tight">Create your account</h1>
+          <p className="text-slate-500 text-sm">Start closing deals with AI — 10 leads free</p>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-xl px-4 py-3 transition-all shadow-lg shadow-blue-500/25 disabled:opacity-70 flex items-center justify-center gap-2 mt-2"
-        >
-          {loading ? (
-            <><i className="fas fa-spinner fa-spin"></i> Creating account...</>
-          ) : (
-            'Create Account'
-          )}
-        </button>
-      </form>
+        {error && (
+          <div className="mb-6 p-3.5 bg-red-500/10 text-red-400 text-sm rounded-xl border border-red-500/20 flex items-center gap-2">
+            <i className="fas fa-exclamation-circle"></i>{error}
+          </div>
+        )}
 
-      <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        Already have an account? <Link href="/login" className="text-blue-500 font-medium hover:text-blue-600">Sign in</Link>
+        <form onSubmit={handleSignup} className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Full Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:border-amber-400/60 focus:bg-amber-400/5 focus:outline-none transition-all"
+              placeholder="Rajiv Sharma"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:border-amber-400/60 focus:bg-amber-400/5 focus:outline-none transition-all"
+              placeholder="name@company.com"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:border-amber-400/60 focus:bg-amber-400/5 focus:outline-none transition-all"
+              placeholder="••••••••"
+              required
+              minLength={6}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2 px-5 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-black font-black text-sm hover:shadow-[0_0_30px_rgba(251,191,36,0.4)] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <><i className="fas fa-spinner fa-spin"></i> Creating account...</>
+            ) : (
+              <><i className="fas fa-bolt"></i> Get Started Free</>
+            )}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-[11px] text-slate-600">
+          By signing up you agree to our{' '}
+          <span className="text-slate-500 underline cursor-pointer">Terms of Service</span>
+        </p>
+
+        <div className="h-px w-full bg-white/5 my-6" />
+
+        <p className="text-center text-sm text-slate-600">
+          Already have an account?{' '}
+          <Link href="/login" className="text-amber-400 font-bold hover:text-amber-300 transition-colors">
+            Sign in
+          </Link>
+        </p>
       </div>
     </motion.div>
   );

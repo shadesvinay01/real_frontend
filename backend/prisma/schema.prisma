@@ -92,6 +92,13 @@ model Customer {
   occupation         String?
   company            String?
   annualIncome       Float?
+  cibilRange         String?
+
+  // Wizard Extra Info
+  preferences        String?   // JSON array: ["Parking", "Lift"]
+  contactTime        String?   // e.g. "Morning"
+  timeline           String?   // e.g. "Immediate"
+  purpose            String?   // e.g. "Buying"
 
   // CRM metadata
   source             String?   // REFERRAL, PORTAL, WALKIN, SOCIAL, OTHER
@@ -153,8 +160,10 @@ model Property {
   bathrooms      Int?
   area           Float?
   builderName    String?
+  builder        String?
   description    String?
   imageUrl       String?
+  features       String?   // JSON array of features (Parking, Lift, etc.)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

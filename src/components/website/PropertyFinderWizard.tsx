@@ -31,12 +31,29 @@ export default function PropertyFinderWizard({ isOpen, onClose }: { isOpen: bool
 
   const handleSubmit = async () => {
     setLoading(true);
-    // Simulate API call for now (Phase 3 will build the backend)
-    setTimeout(() => {
+    try {
+      const res = await fetch('http://localhost:3001/lead-engine/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        // Store matches in sessionStorage for Thank You page to read
+        sessionStorage.setItem('ai_matches', JSON.stringify(data.matches || []));
+        sessionStorage.setItem('ai_summary', data.aiSummary || '');
+        onClose();
+        router.push('/thank-you');
+      } else {
+        alert('Failed to process your request.');
+      }
+    } catch (e) {
+      alert('An error occurred. Please try again.');
+      console.error(e);
+    } finally {
       setLoading(false);
-      onClose();
-      router.push('/thank-you');
-    }, 1500);
+    }
   };
 
   const PREFERENCES = ['Parking', 'Balcony', 'Lift', 'Gym', 'Swimming Pool', 'Clubhouse', 'Corner Property', 'Furnished', 'Semi Furnished', 'Unfurnished'];

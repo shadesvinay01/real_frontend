@@ -2,7 +2,7 @@ import {
   Controller, Get, Post, Put, Delete, Body, Param,
   Query, UseGuards, Request, Res, HttpStatus, ValidationPipe,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BuyersService } from './buyers.service';

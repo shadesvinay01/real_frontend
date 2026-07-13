@@ -12,12 +12,20 @@ const MATCHED_PROPERTIES = [
 
 export default function ThankYouPage() {
   const [loading, setLoading] = useState(true);
+  const [matches, setMatches] = useState<any[]>([]);
 
-  // Simulate AI calculating matches
   useEffect(() => {
+    // Load from session storage
+    const storedMatches = sessionStorage.getItem('ai_matches');
+    if (storedMatches) {
+      try {
+        setMatches(JSON.parse(storedMatches));
+      } catch (e) {}
+    }
+    
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1500); // just a brief artificial delay for UX
     return () => clearTimeout(timer);
   }, []);
 
@@ -60,31 +68,39 @@ export default function ThankYouPage() {
              </div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              {MATCHED_PROPERTIES.map((prop, i) => (
-                <motion.div key={prop.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                  className="group bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-white/10 transition-all">
-                  
-                  {/* Match Score Badge */}
-                  <div className="w-24 h-24 shrink-0 rounded-full border-4 border-emerald-500/20 flex flex-col items-center justify-center relative bg-[#04040a]">
-                     <span className="text-2xl font-black text-emerald-400">{prop.match}%</span>
-                     <span className="text-[10px] font-bold text-slate-500 uppercase">Match</span>
-                     {/* SVG Circle Progress could go here */}
-                  </div>
-
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-xl font-bold text-white mb-1">{prop.title}</h3>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-400 mb-3">
-                       <span className="flex items-center gap-1.5"><i className="fas fa-map-marker-alt text-amber-500"></i> {prop.loc}</span>
-                       <span className="flex items-center gap-1.5"><i className="fas fa-tag text-emerald-500"></i> {prop.price}</span>
+              {matches.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <i className="fas fa-search-minus text-4xl mb-4 opacity-50"></i>
+                  <p>We couldn't find exact matches in our current inventory.</p>
+                  <p className="text-sm">Don't worry, a broker will manually hunt the best options for you!</p>
+                </div>
+              ) : (
+                matches.map((prop, i) => (
+                  <motion.div key={prop.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
+                    className="group bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-white/10 transition-all">
+                    
+                    {/* Match Score Badge */}
+                    <div className="w-24 h-24 shrink-0 rounded-full border-4 border-emerald-500/20 flex flex-col items-center justify-center relative bg-[#04040a]">
+                       <span className="text-2xl font-black text-emerald-400">{prop.match || 80}%</span>
+                       <span className="text-[10px] font-bold text-slate-500 uppercase">Match</span>
                     </div>
-                    <p className="text-sm text-slate-500 italic"><i className="fas fa-magic text-violet-400 mr-2"></i>{prop.reason}</p>
-                  </div>
 
-                  <button className="w-full md:w-auto px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-colors whitespace-nowrap">
-                    View Details
-                  </button>
-                </motion.div>
-              ))}
+                    <div className="flex-1 text-center md:text-left">
+                      <h3 className="text-xl font-bold text-white mb-1">{prop.title}</h3>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-slate-400 mb-3">
+                         <span className="flex items-center gap-1.5"><i className="fas fa-map-marker-alt text-amber-500"></i> {prop.location}</span>
+                         <span className="flex items-center gap-1.5"><i className="fas fa-tag text-emerald-500"></i> ₹{(prop.price / 100000).toFixed(0)} L</span>
+                         {prop.bedrooms && <span className="flex items-center gap-1.5"><i className="fas fa-bed text-blue-400"></i> {prop.bedrooms} BHK</span>}
+                      </div>
+                      <p className="text-sm text-slate-500 italic"><i className="fas fa-magic text-violet-400 mr-2"></i>{prop.reason}</p>
+                    </div>
+
+                    <button className="w-full md:w-auto px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-colors whitespace-nowrap">
+                      View Details
+                    </button>
+                  </motion.div>
+                ))
+              )}
             </motion.div>
           )}
         </div>

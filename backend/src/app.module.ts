@@ -10,14 +10,17 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { CustomersModule } from './customers/customers.module';
 import { NotesModule } from './notes/notes.module';
 import { BuyersModule } from './buyers/buyers.module';
+import { AiModule } from './ai/ai.module';
+import { LeadEngineModule } from './lead-engine/lead-engine.module';
 
 @Module({
   imports: [
     AuthModule, PrismaModule, LeadsModule, PropertiesModule,
     TasksModule, AnalyticsModule, CustomersModule, NotesModule,
-    BuyersModule,
+    BuyersModule, AiModule, LeadEngineModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

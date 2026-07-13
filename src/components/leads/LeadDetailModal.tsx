@@ -81,9 +81,22 @@ export default function LeadDetailModal({ lead, onClose }: LeadDetailModalProps)
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">{lead.customer?.name || 'Unknown Lead'}</h2>
             <p className="text-sm text-slate-500">{lead.customer?.email} • {lead.customer?.phone}</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors">
-            <i className="fas fa-times"></i>
-          </button>
+          <div className="flex items-center gap-2">
+            {lead.customer?.phone && (
+              <a 
+                href={`https://wa.me/${lead.customer.phone.replace(/[^0-9]/g, '')}?text=Hi ${lead.customer.name}, this is regarding your property inquiry...`} 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 transition-colors"
+                title="Chat on WhatsApp"
+              >
+                <i className="fab fa-whatsapp"></i>
+              </a>
+            )}
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors">
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
         </div>
 
         <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex gap-4">

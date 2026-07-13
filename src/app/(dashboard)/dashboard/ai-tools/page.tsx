@@ -1,32 +1,46 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 export default function AIToolsPage() {
+  const [activeTab, setActiveTab] = useState('insights');
+  const [insights, setInsights] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchInsights();
+  }, []);
+
+  const fetchInsights = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/analytics/insights');
+      setInsights(res.data.insights || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight mb-1 flex items-center gap-2">
           <i className="fas fa-robot text-purple-500"></i> AI Assistant
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">Your AI co-pilot for automating sales, emails, and proposals.</p>
-      </div>
-
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">AI Tools</h1>
-          <p className="text-slate-500 dark:text-slate-400">Leverage Jugnu AI to automate and scale your sales.</p>
-        </div>
+        <p className="text-slate-500 dark:text-slate-400">Leverage Jugnu AI to automate and scale your sales.</p>
       </div>
 
       <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6">
-        <button 
+        <button
           onClick={() => setActiveTab('insights')}
           className={`pb-4 font-medium text-sm transition-colors relative ${activeTab === 'insights' ? 'text-blue-600 dark:text-blue-500' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
         >
           Pipeline Insights
           {activeTab === 'insights' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500"></div>}
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('coach')}
           className={`pb-4 font-medium text-sm transition-colors relative ${activeTab === 'coach' ? 'text-blue-600 dark:text-blue-500' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
         >
@@ -40,7 +54,7 @@ export default function AIToolsPage() {
           <div className="space-y-6">
             <h3 className="text-lg font-bold">Data-Driven Insights</h3>
             {loading ? (
-              <div className="text-slate-400">Loading AI Insights...</div>
+              <div className="text-slate-400"><i className="fas fa-spinner fa-spin mr-2"></i>Loading AI Insights...</div>
             ) : insights.length > 0 ? (
               <div className="space-y-4">
                 {insights.map((insight, idx) => (
@@ -63,7 +77,12 @@ export default function AIToolsPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-slate-500">No insights available right now. Let the CRM gather more data.</div>
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-16 h-16 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center mb-4">
+                  <i className="fas fa-brain text-2xl text-purple-400"></i>
+                </div>
+                <p className="text-slate-500 max-w-xs">No insights available yet. Add more leads and let the CRM gather data.</p>
+              </div>
             )}
           </div>
         )}

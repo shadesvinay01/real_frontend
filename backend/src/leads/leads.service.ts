@@ -16,27 +16,53 @@ export class LeadsService {
   }
 
   async create(orgId: string, data: any) {
-    // Basic mock logic: create customer if email doesn't exist, then link lead.
-    // In production, we'd take customer details and lead details properly typed.
+    // Zero-Cost "AI Engine": Calculate Intent Score based on data
+    let score = 50;
+    
+    // Budget & Readiness modifiers
+    if (data.timeline === 'immediate') score += 20;
+    else if (data.timeline === '3_months') score += 10;
+
+    if (data.downPayment === 'ready') score += 20;
+    else if (data.downPayment === 'arranging') score += 5;
+
+    if (data.budget && data.budget >= 10000000) score += 10; // >1Cr budget
+
+    // Cap score at 99
+    score = Math.min(score, 99);
+
     const customer = await this.prisma.customer.create({
       data: {
-        name: data.customerName,
+        name: data.customerName || 'Anonymous',
         email: data.customerEmail || `${Date.now()}@example.com`,
-        budget: data.budget || 0,
-        preferredLocation: data.type || '',
+        phone: data.customerPhone || '',
+        budget: data.budget ? parseFloat(data.budget) : 0,
+        preferredLocation: data.location || data.type || '',
       }
     });
 
-    return this.prisma.lead.create({
+    const lead = await this.prisma.lead.create({
       data: {
         organizationId: orgId,
         customerId: customer.id,
         status: data.status || 'NEW',
-        score: data.score || Math.floor(Math.random() * 100),
-        priority: data.priority || 'MEDIUM',
+        score: score,
+        priority: score > 80 ? 'HIGH' : score > 60 ? 'MEDIUM' : 'LOW',
+        source: 'Public Intake Form',
       },
       include: { customer: true }
     });
+
+    // Automatically add a note simulating CIBIL and intent analysis
+    const cibilTier = score > 80 ? 'Excellent' : score > 60 ? 'Good' : 'Fair';
+    await this.prisma.note.create({
+      data: {
+        leadId: lead.id,
+        content: `🤖 AI Verification Report:\n- Simulated CIBIL Tier: ${cibilTier}\n- Timeline: ${data.timeline || 'N/A'}\n- Down Payment: ${data.downPayment || 'N/A'}\n- Initial Intent Score: ${score}/100`,
+      }
+    });
+
+    return lead;
   }
 
   async updateStatus(id: string, orgId: string, status: string) {

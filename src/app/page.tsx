@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import PropertyFinderWizard from '@/components/website/PropertyFinderWizard';
 
 const FEATURES = [
   {
@@ -69,6 +70,7 @@ const FAQS = [
 export default function JugnuAI() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [accessModal, setAccessModal] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', city: '', leads: '', plan: '' });
 
@@ -244,13 +246,13 @@ export default function JugnuAI() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <button onClick={() => setAccessModal(true)}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-black font-black text-lg hover:shadow-[0_0_50px_rgba(251,191,36,.5)] transition-all flex items-center justify-center gap-3">
-            <i className="fas fa-bolt" /> Get Free Access — 10 Leads Free
+          <button onClick={() => setWizardOpen(true)}
+            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-violet-600 to-indigo-600 text-white font-black text-lg hover:shadow-[0_0_50px_rgba(124,58,237,.5)] transition-all flex items-center justify-center gap-3">
+            <i className="fas fa-home" /> Find My Property
           </button>
           <a href="#demo"
             className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-3">
-            <i className="fas fa-play-circle text-amber-400" /> Watch Live Demo
+            <i className="fas fa-headset text-amber-400" /> Talk to an Expert
           </a>
         </motion.div>
 
@@ -534,6 +536,9 @@ export default function JugnuAI() {
           </p>
         </div>
       </footer>
+
+      {/* Property Finder Wizard Modal */}
+      <PropertyFinderWizard isOpen={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
   );
 }

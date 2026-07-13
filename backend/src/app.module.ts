@@ -7,9 +7,11 @@ import { LeadsModule } from './leads/leads.module';
 import { PropertiesModule } from './properties/properties.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { CustomersModule } from './customers/customers.module';
+import { NotesModule } from './notes/notes.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, LeadsModule, PropertiesModule, TasksModule, AnalyticsModule],
+  imports: [AuthModule, PrismaModule, LeadsModule, PropertiesModule, TasksModule, AnalyticsModule, CustomersModule, NotesModule],
   controllers: [AppController],
   providers: [AppService],
 })

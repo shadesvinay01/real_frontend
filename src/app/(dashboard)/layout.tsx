@@ -9,7 +9,8 @@ import { useEffect } from 'react';
 
 const NAV_ITEMS = [
   { name: 'Overview', href: '/dashboard', icon: 'fa-chart-pie' },
-  { name: 'Leads', href: '/dashboard/leads', icon: 'fa-users' },
+  { name: 'Leads', href: '/dashboard/leads', icon: 'fa-bullseye' },
+  { name: 'Customers', href: '/dashboard/customers', icon: 'fa-users' },
   { name: 'Properties', href: '/dashboard/properties', icon: 'fa-building' },
   { name: 'Tasks', href: '/dashboard/tasks', icon: 'fa-check-square' },
   { name: 'Meetings', href: '/dashboard/meetings', icon: 'fa-calendar-alt' },

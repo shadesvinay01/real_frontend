@@ -11,50 +11,75 @@ export default function AIToolsPage() {
         <p className="text-slate-500 dark:text-slate-400">Your AI co-pilot for automating sales, emails, and proposals.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 opacity-20">
-            <i className="fas fa-magic text-9xl"></i>
-          </div>
-          <h2 className="text-xl font-bold mb-2 relative z-10">AI Proposal Generator</h2>
-          <p className="text-purple-100 mb-6 relative z-10 max-w-md">Generate branded, professional real estate proposals instantly based on customer requirements.</p>
-          <button className="bg-white text-purple-600 px-4 py-2 rounded-lg font-medium text-sm relative z-10 hover:bg-slate-50 transition-colors">
-            Generate Proposal
-          </button>
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight mb-1">AI Tools</h1>
+          <p className="text-slate-500 dark:text-slate-400">Leverage Jugnu AI to automate and scale your sales.</p>
         </div>
+      </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 opacity-20">
-            <i className="fas fa-envelope-open-text text-9xl"></i>
-          </div>
-          <h2 className="text-xl font-bold mb-2 relative z-10">AI Email & WhatsApp Writer</h2>
-          <p className="text-blue-100 mb-6 relative z-10 max-w-md">Draft perfect follow-ups, meeting reminders, and property suggestions in one click.</p>
-          <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium text-sm relative z-10 hover:bg-slate-50 transition-colors">
-            Draft Message
-          </button>
-        </div>
-        
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 flex items-center justify-center">
-              <i className="fas fa-brain text-lg"></i>
-            </div>
-            <h3 className="font-bold text-lg">Sales Coach</h3>
-          </div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Get AI-driven insights on your active deals, next best actions, and probability scores.</p>
-          <button className="text-emerald-500 font-medium text-sm hover:underline">View Insights</button>
-        </div>
+      <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6">
+        <button 
+          onClick={() => setActiveTab('insights')}
+          className={`pb-4 font-medium text-sm transition-colors relative ${activeTab === 'insights' ? 'text-blue-600 dark:text-blue-500' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+        >
+          Pipeline Insights
+          {activeTab === 'insights' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500"></div>}
+        </button>
+        <button 
+          onClick={() => setActiveTab('coach')}
+          className={`pb-4 font-medium text-sm transition-colors relative ${activeTab === 'coach' ? 'text-blue-600 dark:text-blue-500' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
+        >
+          AI Pitch Coach
+          {activeTab === 'coach' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500"></div>}
+        </button>
+      </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-500 flex items-center justify-center">
-              <i className="fas fa-file-contract text-lg"></i>
-            </div>
-            <h3 className="font-bold text-lg">Document Analyzer</h3>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm min-h-[400px]">
+        {activeTab === 'insights' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-bold">Data-Driven Insights</h3>
+            {loading ? (
+              <div className="text-slate-400">Loading AI Insights...</div>
+            ) : insights.length > 0 ? (
+              <div className="space-y-4">
+                {insights.map((insight, idx) => (
+                  <div key={idx} className={`p-4 rounded-xl border flex gap-4 items-start ${
+                    insight.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/10 dark:border-amber-800/30 dark:text-amber-300' :
+                    insight.type === 'danger' ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/10 dark:border-red-800/30 dark:text-red-300' :
+                    insight.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/10 dark:border-emerald-800/30 dark:text-emerald-300' :
+                    'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/10 dark:border-blue-800/30 dark:text-blue-300'
+                  }`}>
+                    <i className={`fas mt-1 ${
+                      insight.type === 'warning' ? 'fa-exclamation-triangle' :
+                      insight.type === 'danger' ? 'fa-fire' :
+                      insight.type === 'success' ? 'fa-check-circle' :
+                      'fa-info-circle'
+                    }`}></i>
+                    <div>
+                      <p className="font-medium text-sm leading-relaxed">{insight.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-slate-500">No insights available right now. Let the CRM gather more data.</div>
+            )}
           </div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Upload property agreements or PAN cards to automatically extract key information.</p>
-          <button className="text-rose-500 font-medium text-sm hover:underline">Upload Document</button>
-        </div>
+        )}
+
+        {activeTab === 'coach' && (
+          <div className="flex flex-col items-center justify-center text-center h-64">
+            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+              <i className="fas fa-microphone-alt text-2xl text-slate-400"></i>
+            </div>
+            <h3 className="font-bold text-lg mb-2">Practice Your Pitch</h3>
+            <p className="text-slate-500 max-w-md mx-auto">Jugnu AI will listen to your sales pitch and give you real-time feedback on confidence, objections handling, and clarity.</p>
+            <button className="mt-6 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all">
+              Start Session
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

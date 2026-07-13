@@ -1,26 +1,26 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model Organization {
   id        String   @id @default(uuid())
   name      String
+  logoUrl   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   users     User[]
+  leads     Lead[]
+  properties Property[]
 }
 
 model Role {
   id          String   @id @default(uuid())
   name        String   @unique
-  permissions String[]
+  permissions String // comma separated string or JSON
   users       User[]
 }
 
@@ -29,6 +29,7 @@ model User {
   email          String       @unique
   passwordHash   String?
   name           String?
+  avatarUrl      String?
   organizationId String?
   roleId         String?
   createdAt      DateTime     @default(now())
@@ -37,6 +38,8 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   role           Role?         @relation(fields: [roleId], references: [id])
   sessions       Session[]
+  assignedLeads  Lead[]        @relation("LeadOwner")
+  tasks          Task[]
 }
 
 model Session {
@@ -47,4 +50,82 @@ model Session {
   createdAt DateTime @default(now())
   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?  @unique
+  phone     String?  @unique
+  budget    Float?
+  preferredLocation String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leads     Lead[]
+}
+
+model Lead {
+  id             String       @id @default(uuid())
+  customerId     String
+  organizationId String
+  ownerId        String?
+  status         String       @default("NEW") // NEW, CONTACTED, SITE_VISIT, NEGOTIATION, WON, LOST
+  score          Int?
+  priority       String?      // HIGH, MEDIUM, LOW
+  source         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  owner          User?        @relation("LeadOwner", fields: [ownerId], references: [id])
+  notes          Note[]
+  activities     Activity[]
+}
+
+model Property {
+  id             String       @id @default(uuid())
+  organizationId String
+  title          String
+  type           String       // RESIDENTIAL, COMMERCIAL, etc.
+  price          Float
+  location       String
+  status         String       @default("AVAILABLE") // AVAILABLE, SOLD
+  amenities      String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  status      String   @default("PENDING") // PENDING, COMPLETED
+  assigneeId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assignee    User     @relation(fields: [assigneeId], references: [id])
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  content   String
+  leadId    String
+  createdAt DateTime @default(now())
+
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  type      String   // CALL, MEETING, EMAIL
+  description String?
+  leadId    String
+  createdAt DateTime @default(now())
+
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 }

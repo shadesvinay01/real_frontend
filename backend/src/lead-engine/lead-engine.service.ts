@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
 import { SubmitWizardDto } from './dto/submit-wizard.dto';
@@ -10,22 +12,18 @@ export class LeadEngineService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ai: AiService,
+    @InjectQueue('ai-jobs') private aiQueue: Queue
   ) {}
 
   async processSubmission(dto: SubmitWizardDto) {
-    // 1. Parse Data
     const budgetMax = this.parseBudget(dto.budgetRange);
     
-    // Default orgId for single-tenant demo if none provided
     const defaultOrg = await this.prisma.organization.findFirst();
     const orgId = dto.orgId || defaultOrg?.id;
     
     if (!orgId) throw new Error("No organization found");
 
-    // 2. Call AI for Summary & Score
-    const aiResult = await this.ai.generateBuyerSummary(dto);
-
-    // 3. Save Customer Record
+    // 1. Save Customer Record (Initial state before AI)
     const customer = await this.prisma.customer.create({
       data: {
         organizationId: orgId,
@@ -35,7 +33,6 @@ export class LeadEngineService {
         whatsapp: dto.whatsapp || dto.phone,
         source: dto.source || 'Website',
         
-        // Wizard Details
         purpose: dto.purpose,
         propertyTypes: dto.type ? JSON.stringify([dto.type]) : null,
         budgetMax: budgetMax,
@@ -50,49 +47,39 @@ export class LeadEngineService {
         preferences: dto.preferences ? JSON.stringify(dto.preferences) : null,
         contactTime: dto.contactTime,
         
-        // AI Results
-        score: aiResult.score,
-        scoreReason: aiResult.scoreReason,
-        aiSummary: aiResult.summary,
         status: 'NEW',
-        priority: aiResult.score >= 80 ? 'HIGH' : aiResult.score >= 50 ? 'MEDIUM' : 'LOW'
+        priority: 'MEDIUM', // Will be updated by AI worker
       }
     });
 
-    // 4. Create Lead Record to track this specific interaction
+    // 2. Create Lead Record
     const lead = await this.prisma.lead.create({
       data: {
         customerId: customer.id,
         organizationId: orgId,
         source: customer.source,
-        score: customer.score,
-        priority: customer.priority,
         status: 'NEW',
       }
     });
 
-    // 5. Match Properties
-    const matches = await this.matchProperties(customer, orgId);
-
-    // 6. Create Follow-up Task
-    await this.prisma.task.create({
-      data: {
-        organizationId: orgId,
-        title: `Follow up with new AI lead: ${customer.name}`,
-        description: `Lead Score: ${customer.score}. AI Summary: ${customer.aiSummary}`,
-        dueDate: new Date(),
-        status: 'PENDING',
-        priority: customer.priority,
-        leadId: lead.id,
-      }
+    // 3. Queue the AI Job for async processing
+    await this.aiQueue.add('process-lead', {
+      customerId: customer.id,
+      leadData: dto,
+      orgId
+    }, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 }
     });
 
-    // 7. Return matches so the Thank You page can display them
+    // 4. Immediately return matches based on raw criteria
+    const matches = await this.matchProperties(customer, orgId);
+
     return {
       success: true,
       customerId: customer.id,
       matches,
-      aiSummary: aiResult.summary
+      aiSummary: 'Processing AI insights in the background...' // Initial UI placeholder
     };
   }
 

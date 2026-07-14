@@ -1,39 +1,36 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { AiService } from './ai.service';
 
 @ApiTags('AI')
 @Controller('ai')
 export class AiController {
-  constructor(@InjectQueue('ai-jobs') private aiQueue: Queue) {}
+  constructor(private readonly aiService: AiService) {}
 
-  @Post('trigger-lead-processing')
-  @ApiOperation({ summary: 'Manually trigger background AI processing for a lead' })
-  async triggerLeadProcessing(@Body() body: { customerId: string, leadData: any, orgId: string }) {
-    const job = await this.aiQueue.add('process-lead', body, {
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 1000 }
-    });
-    return { success: true, jobId: job.id, message: 'Job queued successfully' };
+  @Post('generate-summary')
+  @ApiOperation({ summary: 'Generate an AI buyer summary' })
+  async generateSummary(@Body() body: any) {
+    return this.aiService.generateBuyerSummary(body);
   }
 
-  @Get('queue-status')
-  @ApiOperation({ summary: 'Get status of the AI jobs queue' })
-  async getQueueStatus() {
-    const [waiting, active, completed, failed] = await Promise.all([
-      this.aiQueue.getWaitingCount(),
-      this.aiQueue.getActiveCount(),
-      this.aiQueue.getCompletedCount(),
-      this.aiQueue.getFailedCount(),
-    ]);
+  @Post('generate-message')
+  @ApiOperation({ summary: 'Generate a follow-up message for a buyer' })
+  async generateMessage(@Body() body: { buyerData: any; channel: 'WhatsApp' | 'Email' }) {
+    const msg = await this.aiService.generateFollowUpMessage(body.buyerData, body.channel);
+    return { message: msg };
+  }
 
+  @Get('status')
+  @ApiOperation({ summary: 'Check AI service status' })
+  getStatus() {
     return {
-      queue: 'ai-jobs',
-      waiting,
-      active,
-      completed,
-      failed
+      status: 'operational',
+      providers: {
+        openai: !!process.env.OPENAI_API_KEY,
+        gemini: !!process.env.GEMINI_API_KEY,
+        fallback: true,
+      },
+      queue: 'Redis required for async queue — running in sync mode',
     };
   }
 }

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bullmq';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -16,12 +15,6 @@ import { LeadEngineModule } from './lead-engine/lead-engine.module';
 
 @Module({
   imports: [
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-      },
-    }),
     AuthModule, PrismaModule, LeadsModule, PropertiesModule,
     TasksModule, AnalyticsModule, CustomersModule, NotesModule,
     BuyersModule, AiModule, LeadEngineModule
@@ -30,4 +23,3 @@ import { LeadEngineModule } from './lead-engine/lead-engine.module';
   providers: [AppService],
 })
 export class AppModule {}
-

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 
 export default function DashboardOverview() {
@@ -61,18 +62,68 @@ export default function DashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm min-h-[400px] flex flex-col">
+        
+        {/* NEW BUYER REQUEST WIDGET */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border border-amber-200 dark:border-amber-800/30 rounded-2xl p-6 shadow-sm min-h-[400px] flex flex-col">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold">Lead Conversion Funnel</h2>
-            <select className="text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 outline-none">
-              <option>This Month</option>
-              <option>Last Month</option>
-            </select>
+            <h2 className="text-xl font-black text-amber-900 dark:text-amber-100 flex items-center gap-2">
+              🔥 New Buyer Requests
+            </h2>
+            <Link href="/dashboard/buyers" className="text-sm font-semibold text-amber-700 dark:text-amber-400 hover:underline">View All</Link>
           </div>
-          <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
-            <div className="text-center">
-              <i className="fas fa-chart-bar text-4xl mb-3 opacity-20"></i>
-              <p>Chart Component Ready (Phase 4)</p>
+          
+          <div className="flex-1 overflow-y-auto space-y-4">
+            {/* Hardcoded for visual structure, real data comes from API in a real app */}
+            <div className="bg-white dark:bg-[#0c0c14] border border-amber-100 dark:border-amber-800/50 rounded-xl p-5 shadow-sm">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Rahul Sharma</h3>
+                  <p className="text-sm text-slate-500">Looking for 3BHK Apartment in Dwarka</p>
+                </div>
+                <div className="text-right">
+                  <div className="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg text-xs font-bold inline-block">Score: 92/100</div>
+                  <p className="text-xs text-slate-400 mt-1">High Probability</p>
+                </div>
+              </div>
+              
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 text-sm text-slate-600 dark:text-slate-300 italic mb-4">
+                <i className="fas fa-robot text-amber-500 mr-2"></i>
+                "Rahul is a pre-approved salaried professional looking to move within 3 months. Budget is strong at ₹1.5 Cr. He prefers properties with a Gym and Parking."
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex gap-2">
+                  <span className="text-xs font-bold px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-500">Budget: ₹1.5 Cr</span>
+                  <span className="text-xs font-bold px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-500">Matches: 4 Properties</span>
+                </div>
+                <div className="flex gap-2">
+                  <button className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                    <i className="fab fa-whatsapp text-sm"></i> WhatsApp
+                  </button>
+                  <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                    <i className="fas fa-phone-alt"></i> Call
+                  </button>
+                  <button className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg transition-colors">
+                    Assign
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-[#0c0c14] border border-amber-100 dark:border-amber-800/50 rounded-xl p-5 shadow-sm opacity-70">
+               <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Sneha Kapoor</h3>
+                  <p className="text-sm text-slate-500">Looking for Villa in Gurugram</p>
+                </div>
+                <div className="text-right">
+                  <div className="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-lg text-xs font-bold inline-block">Score: 65/100</div>
+                  <p className="text-xs text-slate-400 mt-1">Medium Probability</p>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                 <button className="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-lg">View Details</button>
+              </div>
             </div>
           </div>
         </div>

@@ -9,7 +9,13 @@ const dbUrl = process.env.DATABASE_URL;
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
-    super({ datasourceUrl: dbUrl });
+    super({
+      datasources: {
+        db: {
+          url: dbUrl,
+        },
+      },
+    });
   }
 
   async onModuleInit() {
